@@ -81,7 +81,7 @@ release: ${RTL433DB} ${ENVIRONMENT} ${MAKEFILE} ${README} ${RTL433DB_CLI} ${RTL4
 	@printf "\033[0m"
 	@printf "\033[34m"
 	@echo "============================ CREATE RELEASE SRC ==============================="
-	@tar -cvzf ${RELEASE}/${ROBOTISK}-src-$(shell date '+%Y-%m-%d-%H-%M-%S').tar.gz \
+	@tar -cvzf ${RELEASE}/${RTL433DB}-src-$(shell date '+%Y-%m-%d-%H-%M-%S').tar.gz \
 	${RTL433DB} ${ENVIRONMENT} ${MAKEFILE} ${README} ${RTL433DB_CLI} ${RTL433DB_SERVICE}
 	@printf "\033[32m"
 	@echo "============================ CREATE RELEASE SRC OK! ==========================="
