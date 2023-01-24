@@ -4,7 +4,7 @@ import logging as log
 from subprocess import Popen, PIPE
 from multiprocessing import Process, Queue
 
-comand = 'rtl_433 -F json'
+command = 'rtl_433 -F json'
 
 log_format = '%(asctime)s.%(msecs)d|%(levelname)s\
 |%(module)s.%(funcName)s:%(lineno)d %(message)s'
@@ -34,7 +34,7 @@ def main():
     """ Старт приложения rtl_433 """
 
     queue = Queue()
-    proc = Popen(comand.split(), stdout=PIPE)
+    proc = Popen(command.split(), stdout=PIPE)
 
     process = Process(target=rtl433,
                       args=(queue, proc),
