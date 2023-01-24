@@ -46,7 +46,7 @@ def main():
         while True:
             if not queue.empty():
                 data = queue.get_nowait()
-                log.info(f"queue <= {data}")
+                log.info(f"<= {data}")
             time.sleep(1)
 
     except KeyboardInterrupt:
