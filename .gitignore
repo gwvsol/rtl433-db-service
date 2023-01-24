@@ -1,1 +1,10 @@
 venv
+*.egg-info
+__pycache__
+release
+archive
+.idea
+build
+dist
+*.spec
+rtl433db.conf
