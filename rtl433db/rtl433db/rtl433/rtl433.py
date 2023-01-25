@@ -1,18 +1,11 @@
 import time
 import json
-import logging as log
+from json.decoder import JSONDecodeError
 from subprocess import Popen, PIPE
 from multiprocessing import Process, Queue
 
-command = 'rtl_433 -F json'
-
-log_format = '%(asctime)s.%(msecs)d|%(levelname)s\
-|%(module)s.%(funcName)s:%(lineno)d %(message)s'
-
-
-log.basicConfig(level=log.INFO,
-                format=log_format,
-                datefmt='%Y-%m-%d %H:%M:%S')
+from rtl433db.conf import rtl433_command as command
+from rtl433db.log import logging as log
 
 
 def rtl433(queue: Queue, proc: Popen):
@@ -23,9 +16,13 @@ def rtl433(queue: Queue, proc: Popen):
             line: bytes = proc.stdout.readline()
             rtl433_data = json.loads(line.decode('utf-8'))
             queue.put(rtl433_data)
-            # log.info(f"queue => {rtl433_data}")
             time.sleep(1)
     except KeyboardInterrupt:
+        proc.kill()
+        proc.communicate()
+    except JSONDecodeError as err:
+        log.error(f"error => {err}")
+        queue.put("JSONDecodeError")
         proc.kill()
         proc.communicate()
 
@@ -47,8 +44,13 @@ def main():
             if not queue.empty():
                 data = queue.get_nowait()
                 log.info(f"<= {data}")
+                if data == "JSONDecodeError":
+                    break
             time.sleep(1)
-
+        proc.kill()
+        proc.communicate()
+        process.join() # 
+        log.error("TUNER DVB-T/T2/C FM & DAB => NOT FOUND => STOP")
     except KeyboardInterrupt:
         proc.kill()
         proc.communicate()
