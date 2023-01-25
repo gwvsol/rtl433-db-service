@@ -117,6 +117,7 @@ clean:
 run: ${VENV_NAME} ${RTL433DB} ${RTL433DB_CLI}
 	@printf "\033[0m"
 	@printf "\033[33m"
-	@echo "================================ RUN ROBOTISK ================================="
+	@echo "================================ RUN RTL433DB ================================="
 	@printf "\033[0m"
 	@${PYTHON} ${RTL433DB_CLI}
+#	@${PYTHON} ${RTL433DB_CLI} --saveconf true
