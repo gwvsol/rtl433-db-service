@@ -7,4 +7,4 @@ archive
 build
 dist
 *.spec
-rtl433db.conf
+*.conf
