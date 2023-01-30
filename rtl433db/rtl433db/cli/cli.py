@@ -1,8 +1,6 @@
 import click
 from .help import ClickHelp as cli
 
-from rtl433db.rtl433 import main
-
 
 @click.command(help=cli.rtl433db)
 @click.option("-s", "--saveconf",
@@ -15,4 +13,5 @@ def start(saveconf: bool):
         click.echo("\n\033[1;96m {}\033[00m\n" .format(cli.saveconf))
         saveconfig()
     click.echo("\n\033[1;96m {}\033[00m\n" .format(cli.rtl433db))
+    from rtl433db.rtl433 import main
     main()
