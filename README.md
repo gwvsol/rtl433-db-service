@@ -36,3 +36,7 @@ print(psycopg2.extensions.libpq_version())
 # SCRAM authentication requires libpq version 10 or above
 
 ```
+
+```SQL
+select t.id, t.datetime, t.temperature, s.model, s.sensor_id from temperature t left join sensors s on t.sensor_id=s.id;
+```
