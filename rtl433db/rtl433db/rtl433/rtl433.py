@@ -22,7 +22,7 @@ def add_data(data: dict):
     with Session(autoflush=False, bind=engine) as db:
         sensor = db.query(Sensors).filter(Sensors.model == model).first()
 
-        if sensor:
+        if sensor and temp:
             sensor_id = sensor.id
             temperature = Temperature(sensor_id=sensor.id,
                                       temperature=temp,
