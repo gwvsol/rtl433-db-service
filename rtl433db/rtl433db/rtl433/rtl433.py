@@ -22,14 +22,14 @@ def add_data(data: dict):
     with Session(autoflush=False, bind=engine) as db:
         sensor = db.query(Sensors).filter(Sensors.model == model).first()
 
-        if sensor and temp:
+        if sensor and isinstance(temp, int):
             sensor_id = sensor.id
             temperature = Temperature(sensor_id=sensor.id,
                                       temperature=temp,
                                       datetime=datetime)
             db.add(temperature)
             db.commit()
-        else:
+        elif sensor is None:
             if model and isinstance(sensor_id, (int, str)):
                 new_sensor = dict(model=model, sensor_id=str(sensor_id))
                 if datetime:
@@ -37,6 +37,9 @@ def add_data(data: dict):
                 new_sensor = Sensors(**new_sensor)
                 db.add(new_sensor)
                 db.commit()
+        else:
+            pass
+            
 
 
 def rtl433(queue: Queue, proc: Popen):
