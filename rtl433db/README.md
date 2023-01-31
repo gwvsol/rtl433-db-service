@@ -2,14 +2,20 @@
 ---    
 
 [Крадущийся тигр, затаившийся SQLAlchemy. Основы](https://habr.com/ru/post/470285/)     
-[SQLAlchemy. Основы](https://github.com/sandix90/sqlalchemy_basics) - как кажется хороший пример кода   
-
+[SQLAlchemy. Основы](https://github.com/sandix90/sqlalchemy_basics) - как кажется хороший пример кода     
+[SQLAlchemy](https://ru.wikibooks.org/wiki/SQLAlchemy) - хороший пример кода
 
 [Alembic’s documentation](https://alembic.sqlalchemy.org/en/latest/)     
 [Пишем и тестируем миграции БД с Alembic. Доклад Яндекса](https://habr.com/ru/company/yandex/blog/511892/)    
 [Создаем начальную миграцию с alembic для существующей базы](https://habr.com/ru/post/585228/)    
 
----    
+---     
+
+[Psycopg documentation](https://www.psycopg.org/docs/install.html)      
+[psycopg 3 documentation](https://www.psycopg.org/psycopg3/docs/basic/install.html)     
+
+---
+
 
 ### SCRAM authentication requires libpq version 10 or above
 
