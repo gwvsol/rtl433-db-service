@@ -62,6 +62,23 @@ config['POSTGRESQL'] = {
     'POSTGRESQL_DBNAME': POSTGRESQL_DBNAME
     }
 
+# =====================================================
+#
+
+WEATHERAPI_KEY = getenv('WEATHERAPI_KEY', default=None)
+if WEATHERAPI_KEY is None:
+    raise ConfigError('WEATHERAPI_KEY ERROR in env')
+
+WEATHERAPI_LOCATION = getenv('WEATHERAPI_LOCATION', default=None)
+if WEATHERAPI_LOCATION is None:
+    raise ConfigError('WEATHERAPI_LOCATION ERROR in env')
+
+
+config['WEATHERAPI'] = {
+    'WEATHERAPI_KEY': WEATHERAPI_KEY,
+    'WEATHERAPI_LOCATION': WEATHERAPI_LOCATION
+    }
+
 #
 # =====================================================
 #
