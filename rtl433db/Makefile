@@ -67,8 +67,8 @@ check: ${PYCODESTYLE} ${PYFLAKES} ${RTL433DB} ${RTL433DB_CLI}
 	@printf "\033[32m"
 	@echo "============================== CHECK SRC CODE ================================="
 	@printf "\033[31m"
-	@${PYCODESTYLE} ${ROBOTISK} ${RTL433DB_CLI}
-	@${PYFLAKES} ${ROBOTISK} ${RTL433DB_CLI} 
+	@${PYCODESTYLE} ${RTL433DB} ${RTL433DB_CLI}
+	@${PYFLAKES} ${RTL433DB} ${RTL433DB_CLI} 
 	@printf "\033[32m"
 	@echo "============================ CHECK SRC CODE OK ================================"
 	@printf "\033[0m"
