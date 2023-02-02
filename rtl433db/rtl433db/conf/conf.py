@@ -65,3 +65,29 @@ except (psycopg2.OperationalError, OperationalError):
 
 
 rtl433_command = 'rtl_433 -F json'
+
+_weatherapi = conf['WEATHERAPI']
+weatherapi_key = _weatherapi.get('weatherapi_key')
+weatherapi_location = _weatherapi.get('weatherapi_location')
+weatherapi_url = 'https://api.weatherapi.com/v1/current.json'
+weatherapi_lang = 'ru'
+weatherapi_air_quality = 'no'
+weatherapi_timeout = 3
+weatherapi_interval = 60
+
+# weatherapi_url = "{}?key={}&q={}&aqi={}&lang={}".format(
+#     weatherapi_url, weatherapi_key,
+#     weatherapi_location, weatherapi_air_quality,
+#     weatherapi_lang
+# )
+
+weatherapi_url = "{}?key={}&q={}&aqi={}".format(
+    weatherapi_url, weatherapi_key,
+    weatherapi_location, weatherapi_air_quality
+)
+
+
+class WeatherApiConf:
+    url = weatherapi_url
+    interval = weatherapi_interval
+    timeout = weatherapi_timeout
