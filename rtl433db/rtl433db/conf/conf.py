@@ -64,7 +64,12 @@ except (psycopg2.OperationalError, OperationalError):
         log.error(err)
 
 
-rtl433_command = 'rtl_433 -F json'
+class Rtl433Conf:
+    command: str = 'rtl_433 -F json'
+    name: str = 'rtl433 process'
+    log_out: bool = False
+    # log_out: bool = True
+
 
 _weatherapi = conf['WEATHERAPI']
 weatherapi_key = _weatherapi.get('weatherapi_key')
@@ -73,7 +78,7 @@ weatherapi_url = 'https://api.weatherapi.com/v1/current.json'
 weatherapi_lang = 'ru'
 weatherapi_air_quality = 'no'
 weatherapi_timeout = 3
-weatherapi_interval = 60
+weatherapi_interval = 300  # интервал запроса погоды в секундах
 
 # weatherapi_url = "{}?key={}&q={}&aqi={}&lang={}".format(
 #     weatherapi_url, weatherapi_key,
