@@ -3,21 +3,26 @@ from requests.exceptions import ConnectionError, \
                                 ReadTimeout, \
                                 InvalidSchema, \
                                 JSONDecodeError
+from multiprocessing import Queue
 
 from rtl433db.log import logging as log
 from rtl433db.conf import WeatherApiConf as conf
+from rtl433db.schemas import WeatherSchema
 
 
-def weatherapi() -> tuple:
+def weatherapi(queue: Queue) -> tuple:
     """ Получение данных c WeatherAPI """
-    status_code, data = 500, dict()
+    status_code, weather = 500, dict(weather=dict())
     try:
         with Session() as session:
             resp = session.get(conf.url, timeout=conf.timeout)
-            status_code, data = resp.status_code, resp.json()
-            log.info(f"{weatherapi.__name__} => {data} <= {status_code}")
+            status_code, weather = resp.status_code, resp.json()
+            # log.info(f"{weatherapi.__name__} => {weather} <= {status_code}")
+            if status_code == 200:
+                weather = WeatherSchema().validate(weather)
+                queue.put(dict(weather=weather))
     except (ConnectionError, ReadTimeout,
             InvalidSchema, JSONDecodeError) as err:
         log.error(f"error => {err}")
     finally:
-        return data, status_code
+        return weather, status_code
