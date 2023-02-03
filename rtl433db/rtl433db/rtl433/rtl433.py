@@ -7,10 +7,11 @@ from json.decoder import JSONDecodeError
 from multiprocessing import Process, Queue
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from rtl433db.conf import rtl433_command as command
+from rtl433db.conf import Rtl433Conf as rtl433_conf
 from rtl433db.conf import WeatherApiConf as weathew_conf
 from rtl433db.log import logging as log
-from rtl433db.db import Base, Sensors, Temperature, engine
+from rtl433db.db import Base, Sensors, Temperature, \
+                        Weather, WeatherLocation, engine
 from rtl433db.weather import weatherapi
 
 
@@ -18,56 +19,67 @@ def format_data_temp(fun):
     """ Декоратор для форматирования данных """
     @wraps(fun)
     def decorator(*args, **kwargs):
-        data = kwargs.pop('data', dict())
-        kwargs.update(model=data.get('model', None),
-                      datetime=data.get('time', None),
-                      temp=data.get('temperature_C', None),
-                      sensor_id=data.get('id', None))
+        data: dict = kwargs.get('data', None)
+        if isinstance(data, dict):
+            if data.get('sensor', None):
+                kwargs = data.pop('sensor')
+            if data.get('weather', None):
+                kwargs = data.pop('weather')
         return fun(*args, **kwargs)
     return decorator
 
 
 @format_data_temp
-def add_data(model: str = None,
-             datetime: str = None,
-             temp: str = None,
-             sensor_id: str = None,
+def add_data(sensor: dict = None,
+             weather: dict = None,
              data: dict = dict()):
     """ Запись данных в базу данных """
 
     with Session(autoflush=False, bind=engine) as db:
 
-        sensor = db.query(Sensors).filter(Sensors.model == model).first()
+        if sensor:
+            _sensor = db.query(Sensors).filter(
+                Sensors.model == sensor.get('model')).first()
 
-        if sensor and isinstance(temp, (int, float)):
-            sensor_id = sensor.id
-            temperature = Temperature(sensor_id=sensor.id,
-                                      temperature=temp,
-                                      datetime=datetime)
-            db.add(temperature)
-            db.commit()
-
-        elif sensor is None:
-            if model and isinstance(sensor_id, (int, str)):
-                new_sensor = dict(model=model, sensor_id=str(sensor_id))
-                if datetime:
-                    new_sensor.update(datetime=datetime)
-                new_sensor = Sensors(**new_sensor)
-                db.add(new_sensor)
+            if _sensor and isinstance(sensor.get('sensor_data'), dict):
+                db.add(Temperature(sensor_id=_sensor.id,
+                                   **sensor.get('sensor_data')))
                 db.commit()
 
-        else:
-            pass
+            elif sensor is None:
+                db.add(Sensors(**sensor.get('sensor')))
+                db.commit()
+
+            else:
+                pass
+
+        if weather:
+            weatherlocation = db.query(WeatherLocation).filter(
+                WeatherLocation.location == weather.get('name')).first()
+
+            if weatherlocation and isinstance(weather.get('weather'), dict):
+                db.add(Weather(location=weatherlocation.id,
+                               **weather.get('weather')))
+                db.commit()
+
+            elif weatherlocation is None:
+                db.add(WeatherLocation(**weather.get('location')))
+                db.commit()
+
+            else:
+                pass
 
 
 def rtl433(queue: Queue, proc: Popen):
     """ Чтения данных с Astrometa DVB-T/T2/C FM & DAB """
+    from rtl433db.schemas import SensorSchema
     log.info("=> start")
+    sensor = SensorSchema()
     try:
         while True:
             line: bytes = proc.stdout.readline()
             rtl433_data = json.loads(line.decode('utf-8'))
-            queue.put(rtl433_data)
+            queue.put(dict(sensor=sensor.validate(rtl433_data)))
             time.sleep(1)
     except KeyboardInterrupt:
         proc.kill()
@@ -82,18 +94,22 @@ def rtl433(queue: Queue, proc: Popen):
 def main():
     """ Старт приложения rtl_433 """
 
+    w_queue = Queue()
+
+    weatherapi(queue=w_queue)
+
     scheduler = BackgroundScheduler()
     log.getLogger('apscheduler').propagate = False
 
-    queue = Queue()
-    proc = Popen(command.split(), stdout=PIPE)
+    proc = Popen(rtl433_conf.command.split(), stdout=PIPE)
 
     process = Process(target=rtl433,
-                      args=(queue, proc),
-                      name='rtl433 process')
+                      args=(w_queue, proc),
+                      name=rtl433_conf.name)
 
     scheduler.add_job(weatherapi,
                       'interval',
+                      kwargs=dict(queue=w_queue),
                       seconds=weathew_conf.interval)
     scheduler.start()
 
@@ -104,9 +120,10 @@ def main():
         process.start()
         log.info(" => start")
         while True:
-            if not queue.empty():
-                data = queue.get_nowait()
-                log.info(f"<= {data}")
+            if not w_queue.empty():
+                data = w_queue.get_nowait()
+                if rtl433_conf.log_out:
+                    log.info(f"<= {data}")
                 if data == "JSONDecodeError":
                     break
                 add_data(data=data)
