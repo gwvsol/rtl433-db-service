@@ -46,7 +46,7 @@ def add_data(sensor: dict = None,
                                    **sensor.get('sensor_data')))
                 db.commit()
 
-            elif sensor is None:
+            elif _sensor is None:
                 db.add(Sensors(**sensor.get('sensor')))
                 db.commit()
 
