@@ -28,6 +28,13 @@ RTL433DB_CONFIG = getenv('RTL433DB_CONFIG', default=None)
 if RTL433DB_CONFIG is None:
     raise ConfigError('RTL433DB_CONFIG ERROR in env')
 
+RTL433DB_LOG = getenv('RTL433DB_LOG', default=None)
+
+if RTL433DB_LOG:
+    config['rtl433db'] = {
+        'RTL433DB_LOG': RTL433DB_LOG
+    }
+
 # =====================================================
 #
 
@@ -54,7 +61,7 @@ if POSTGRESQL_DBNAME is None:
     raise ConfigError('POSTGRESQL_DBNAME ERROR in env')
 
 
-config['POSTGRESQL'] = {
+config['postgresql'] = {
     'POSTGRESQL_HOST': POSTGRESQL_HOST,
     'POSTGRESQL_PORT': POSTGRESQL_PORT,
     'POSTGRESQL_USER': POSTGRESQL_USER,
@@ -74,7 +81,7 @@ if WEATHERAPI_LOCATION is None:
     raise ConfigError('WEATHERAPI_LOCATION ERROR in env')
 
 
-config['WEATHERAPI'] = {
+config['weatherapi'] = {
     'WEATHERAPI_KEY': WEATHERAPI_KEY,
     'WEATHERAPI_LOCATION': WEATHERAPI_LOCATION
     }
