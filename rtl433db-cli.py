@@ -1,5 +1,5 @@
-from rtl433db.cli import start
+from rtl433db.cli import main
 
 
 if __name__ == '__main__':
-    start()
+    main()
