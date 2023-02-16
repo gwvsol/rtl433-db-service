@@ -1,6 +1,6 @@
-from rtl433db.cli.cli import start
+from rtl433db.cli.cli import main
 
 
 __all__ = (
-    'start',
+    'main',
 )
