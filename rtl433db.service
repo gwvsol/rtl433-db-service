@@ -1,13 +1,18 @@
-#/etc/systemd/system
+# /etc/systemd/system
 
 [Unit]
-Description=RTL_433
+Description=Service RTL433
+ConditionPathExists=/defaultdir/Makefile
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/pi/Wetterstation-Privat/rtl_433_sql.py
-Restart=always
+WorkingDirectory=/defaultdir
+# ExecStart=/usr/bin/python3 /home/pi/Wetterstation-Privat/rtl_433_sql.py
+ExecStart=make run
+# Restart=always
+Restart=on-failure
 RestartSec=10
 
 [Install]
+# WantedBy=default.target
 WantedBy=multi-user.target
