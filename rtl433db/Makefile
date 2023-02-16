@@ -1,4 +1,9 @@
 #===========================================================
+
+PATHDIR=$(shell pwd | sed 's/\//\\\//g')
+WorkingDirectory=$(shell cat ${RTL433DB_SERVICEFILE} | grep WorkingDirectory | awk -F "=" '{print $$2}' | sed 's/\//\\\//g')
+
+#===========================================================
 # ################## Установка приложения ##################
 #===========================================================
 # Установка зависимостей
@@ -76,13 +81,13 @@ check: ${PYCODESTYLE} ${PYFLAKES} ${RTL433DB} ${RTL433DB_CLI}
 #===========================================================
 # Создание релиза исходного кода
 .PHONY: release
-release: ${RTL433DB} ${ENVIRONMENT} ${MAKEFILE} ${README} ${RTL433DB_CLI} ${RTL433DB_SERVICE}
+release: ${RTL433DB} ${ENVIRONMENT} ${MAKEFILE} ${README} ${RTL433DB_CLI} ${RTL433DB_SERVICEFILE}
 	@make clean
 	@printf "\033[0m"
 	@printf "\033[34m"
 	@echo "============================ CREATE RELEASE SRC ==============================="
 	@tar -cvzf ${RELEASE}/${RTL433DB}-src-$(shell date '+%Y-%m-%d-%H-%M-%S').tar.gz \
-	${RTL433DB} ${ENVIRONMENT} ${MAKEFILE} ${README} ${RTL433DB_CLI} ${RTL433DB_SERVICE}
+	${RTL433DB} ${ENVIRONMENT} ${MAKEFILE} ${README} ${RTL433DB_CLI} ${RTL433DB_SERVICEFILE}
 	@printf "\033[32m"
 	@echo "============================ CREATE RELEASE SRC OK! ==========================="
 	@printf "\033[0m"
@@ -114,10 +119,72 @@ clean:
 
 # Запуск RTL433DB
 .PHONY: run
+run: saveconf?=false
 run: ${VENV_NAME} ${RTL433DB} ${RTL433DB_CLI}
 	@printf "\033[0m"
 	@printf "\033[33m"
 	@echo "================================ RUN RTL433DB ================================="
 	@printf "\033[0m"
-	@${PYTHON} ${RTL433DB_CLI}
-#	@${PYTHON} ${RTL433DB_CLI} --saveconf true
+	@${PYTHON} ${RTL433DB_CLI} start --saveconf ${saveconf}
+
+
+# Запуск RTL433DB в режиме SAVECONFIG
+.PHONY: saveconf
+saveconf: ${VENV_NAME} ${RTL433DB} ${RTL433DB_CLI}
+	@printf "\033[0m"
+	@printf "\033[33m"
+	@echo "============================ RTL433DB SAVECONFIG =============================="
+	@printf "\033[0m"
+	@${PYTHON} ${RTL433DB_CLI} saveconf
+	@printf "\033[33m"
+	@echo "========================== RTL433DB SAVECONFIG OK ============================="
+	@printf "\033[0m"
+
+
+#===========================================================
+# ############# Приложение локально как сервис #############
+#===========================================================
+
+.PHONY: install-service
+install-service:
+	@cp ${RTL433DB_SERVICEFILE} /tmp/${RTL433DB_SERVICEFILE}
+	@sed -i 's#${WorkingDirectory}#${PATHDIR}#' /tmp/${RTL433DB_SERVICEFILE}
+	@[ -d ${SERVICEDIR} ] || mkdir -p ${SERVICEDIR}
+	@mv /tmp/${RTL433DB_SERVICEFILE} ${SERVICEDIR}
+	@systemctl --user daemon-reload
+	@sudo loginctl enable-linger ${USER}
+
+.PHONY: remove-service
+remove-service: ${SERVICEDIR}/${RTL433DB_SERVICEFILE}
+	@make stop-service
+	@make remove-autostart-service
+	@! [ -f ${SERVICEDIR}/${RTL433DB_SERVICEFILE} ] || rm ${SERVICEDIR}/${RTL433DB_SERVICEFILE}
+	@systemctl --user daemon-reload
+
+.PHONY: start-service
+start-service: ${SERVICEDIR}/${RTL433DB_SERVICEFILE}
+	@systemctl --user start ${RTL433DB_SERVICEFILE}
+
+.PHONY: stop-service
+stop-service: ${SERVICEDIR}/${RTL433DB_SERVICEFILE}
+	@systemctl --user stop ${RTL433DB_SERVICEFILE}
+
+.PHONY: restart-service
+restart-service: ${SERVICEDIR}/${RTL433DB_SERVICEFILE}
+	@systemctl --user restart ${RTL433DB_SERVICEFILE}
+
+.PHONY: status-service
+status-service: ${SERVICEDIR}/${RTL433DB_SERVICEFILE}
+	@systemctl --user status ${RTL433DB_SERVICEFILE}
+
+.PHONY: autostart-service
+autostart-service: ${SERVICEDIR}/${RTL433DB_SERVICEFILE}
+	@systemctl --user enable ${RTL433DB_SERVICEFILE}
+
+.PHONY: remove-autostart-service
+remove-autostart-service: ${SERVICEDIR}/${RTL433DB_SERVICEFILE}
+	@systemctl --user disable ${RTL433DB_SERVICEFILE}
+
+.PHONY: log-service
+log-service: ${SERVICEDIR}/${RTL433DB_SERVICEFILE}
+	@journalctl --user -b -f -u ${RTL433DB_SERVICEFILE}
