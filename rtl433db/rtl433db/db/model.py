@@ -32,6 +32,7 @@ class Temperature(Base):
     sensor_model = relationship("Sensors",
                                 lazy="joined")
     temperature = Column(Float, nullable=False)
+    humidity = Column(Integer)
     datetime = Column(DateTime(timezone=True),
                       default=datetime.now())
 
