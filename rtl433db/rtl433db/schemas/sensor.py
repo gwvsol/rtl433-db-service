@@ -35,13 +35,30 @@ class SensorSchema:
     def create_fields(self, appstruct: dict) -> dict:
         """ Создание структуры данных """
 
+        temp_F = appstruct.get('temperature_F', None)
+        temp_C = appstruct.get('temperature_C', None)
+
+        humidity = appstruct.get('humidity', None)
+
+        if isinstance(temp_C, (int, float)):
+            temp_C = temp_C
+        elif isinstance(temp_F, (int, float)):
+            #  Fahrenheit => Celsius
+            temp_C = round((temp_F - 32) / 1.8, 2)
+        else:
+            temp_C = 0.0
+
         new = dict(model=appstruct.get('model', ''),
                    sensor=dict(
                        model=appstruct.get('model', ''),
                        sensor_id=appstruct.get('id', ''),
                        datetime=appstruct.get('time', datetime.now())),
                    sensor_data=dict(
-                       temperature=appstruct.get('temperature_C', 0.0),
+                       temperature=temp_C,
                        datetime=appstruct.get('time', datetime.now()))
                    )
+
+        if humidity:
+            new.get('sensor_data').update(humidity=humidity)
+
         return dict(sensor=new)
