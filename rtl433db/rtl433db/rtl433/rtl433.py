@@ -79,6 +79,8 @@ def rtl433(queue: Queue, proc: Popen):
         while True:
             line: bytes = proc.stdout.readline()
             rtl433_data = json.loads(line.decode('utf-8'))
+            if rtl433_conf.log_out:
+                log.info(f"<= {rtl433_data}")
             queue.put(dict(sensor=sensor.validate(rtl433_data)))
             time.sleep(1)
     except KeyboardInterrupt:
@@ -123,7 +125,7 @@ def main():
             if not w_queue.empty():
                 data = w_queue.get_nowait()
                 if rtl433_conf.log_out:
-                    log.info(f"<= {data}")
+                    log.info(f"=> {data}")
                 if data == "JSONDecodeError":
                     break
                 add_data(data=data)
