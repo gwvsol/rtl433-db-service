@@ -7,6 +7,7 @@ from multiprocessing import Queue
 
 from rtl433db.log import logging as log
 from rtl433db.conf import WeatherApiConf as conf
+from rtl433db.conf import Rtl433Conf as rtl433_conf
 from rtl433db.schemas import WeatherSchema
 
 
@@ -17,7 +18,8 @@ def weatherapi(queue: Queue) -> tuple:
         with Session() as session:
             resp = session.get(conf.url, timeout=conf.timeout)
             status_code, weather = resp.status_code, resp.json()
-            # log.info(f"{weatherapi.__name__} => {weather} <= {status_code}")
+            if rtl433_conf.log_out:
+                log.info(f"<= {weather} <= {status_code}")
             if status_code == 200:
                 weather = WeatherSchema().validate(weather)
                 queue.put(dict(weather=weather))
