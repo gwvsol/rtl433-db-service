@@ -3,32 +3,10 @@
 
 [rtl_433](https://triq.org/rtl_433)      
 
-Зависимости для работы ```TUNER DVB-T/T2/C FM & DAB```   
-
-``` shell
-# sudo dnf install rtl-433
-sudo apt install rtl-433
-
-```
-
 [RTL_433_SQL_Connection](https://github.com/Domifry/RTL_433_SQL_Connection)    
 [SQL Connection for RTL_433 #1828](https://github.com/merbanan/rtl_433/issues/1828)    
 
 ---   
-
-Зависимости для сборки ```psycopg2``` из исходников         
-
-``` shell
-sudo apt install libpq5 libpq-dev
-
-sudo dnf install libpq libpq-devel
-sudo dnf install automake jq gcc gcc-c++ kernel-devel \
-    git zip unzip tzdata curl wget bzip2 xz cmake autoconf \
-    python3-devel python3-pip python3-setuptools python3-wheel
-
-pip install psycopg2
-
-```
 
 ```python
 import psycopg2
