@@ -81,13 +81,15 @@ check: ${PYCODESTYLE} ${PYFLAKES} ${RTL433DB} ${RTL433DB_CLI}
 #===========================================================
 # Создание релиза исходного кода
 .PHONY: release
-release: ${RTL433DB} ${ENVIRONMENT} ${MAKEFILE} ${README} ${RTL433DB_CLI} ${RTL433DB_SERVICEFILE}
+release: ${RTL433DB} ${ENVIRONMENT} ${MAKEFILE} ${README} ${RTL433DB_CLI} \
+		 ${RTL433DB_SERVICEFILE} ${RTL433DB_SET_SYSTEM}
 	@make clean
 	@printf "\033[0m"
 	@printf "\033[34m"
 	@echo "============================ CREATE RELEASE SRC ==============================="
 	@tar -cvzf ${RELEASE}/${RTL433DB}-src-$(shell date '+%Y-%m-%d-%H-%M-%S').tar.gz \
-	${RTL433DB} ${ENVIRONMENT} ${MAKEFILE} ${README} ${RTL433DB_CLI} ${RTL433DB_SERVICEFILE}
+	${RTL433DB} ${ENVIRONMENT} ${MAKEFILE} ${README} ${RTL433DB_CLI} \
+		${RTL433DB_SERVICEFILE} ${RTL433DB_SET_SYSTEM}
 	@printf "\033[32m"
 	@echo "============================ CREATE RELEASE SRC OK! ==========================="
 	@printf "\033[0m"
