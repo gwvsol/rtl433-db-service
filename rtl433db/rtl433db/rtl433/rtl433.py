@@ -1,8 +1,9 @@
 import time
 import json
-from functools import wraps
+import copy
+# from functools import wraps
 from subprocess import Popen, PIPE
-from sqlalchemy.orm import Session
+# from sqlalchemy.orm import Session
 from json.decoder import JSONDecodeError
 from multiprocessing import Process, Queue
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -10,78 +11,70 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from rtl433db.conf import Rtl433Conf as rtl433_conf
 from rtl433db.conf import WeatherApiConf as weathew_conf
 from rtl433db.log import logging as log
-from rtl433db.db import Base, Sensors, Temperature, \
-                        Weather, WeatherLocation, engine
-from rtl433db.weather import weatherapi
+# from rtl433db.db import Base, Sensors, Temperature, \
+#                         Weather, WeatherLocation, engine
+from rtl433db.weather import wget
 
 
-def format_data_temp(fun):
-    """ Декоратор для форматирования данных """
-    @wraps(fun)
-    def decorator(*args, **kwargs):
-        data: dict = kwargs.get('data', None)
-        if isinstance(data, dict):
-            if data.get('sensor', None):
-                kwargs = data.pop('sensor')
-            if data.get('weather', None):
-                kwargs = data.pop('weather')
-        return fun(*args, **kwargs)
-    return decorator
-
-
-@format_data_temp
-def add_data(sensor: dict = None,
-             weather: dict = None,
-             data: dict = dict()):
+def db(sensor: dict = None, weather: dict = None):
     """ Запись данных в базу данных """
 
-    with Session(autoflush=False, bind=engine) as db:
+    if rtl433_conf.log_out and (sensor or weather):
+        s = '' if sensor is None else sensor
+        w = '' if weather is None else weather
+        log.info("    => {}{}".format(s, w))
 
-        if sensor:
-            _sensor = db.query(Sensors).filter(
-                Sensors.model == sensor.get('model')).first()
+    # with Session(autoflush=False, bind=engine) as db:
 
-            if _sensor and isinstance(sensor.get('sensor_data'), dict):
-                db.add(Temperature(sensor_id=_sensor.id,
-                                   **sensor.get('sensor_data')))
-                db.commit()
+    #     if sensor:
+    #         _sensor = db.query(Sensors).filter(
+    #             Sensors.model == sensor.get('model')).first()
 
-            elif _sensor is None:
-                db.add(Sensors(**sensor.get('sensor')))
-                db.commit()
+    #         if _sensor and isinstance(sensor.get('sensor_data'), dict):
+    #             db.add(Temperature(sensor_id=_sensor.id,
+    #                                **sensor.get('sensor_data')))
+    #             db.commit()
 
-            else:
-                pass
+    #         elif _sensor is None:
+    #             db.add(Sensors(**sensor.get('sensor')))
+    #             db.commit()
 
-        if weather:
-            weatherlocation = db.query(WeatherLocation).filter(
-                WeatherLocation.location == weather.get('name')).first()
+    #         else:
+    #             pass
 
-            if weatherlocation and isinstance(weather.get('weather'), dict):
-                db.add(Weather(location=weatherlocation.id,
-                               **weather.get('weather')))
-                db.commit()
+    #     if weather:
+    #         weatherlocation = db.query(WeatherLocation).filter(
+    #             WeatherLocation.location == weather.get('name')).first()
 
-            elif weatherlocation is None:
-                db.add(WeatherLocation(**weather.get('location')))
-                db.commit()
+    #         if weatherlocation and isinstance(weather.get('weather'), dict):
+    #             db.add(Weather(location=weatherlocation.id,
+    #                            **weather.get('weather')))
+    #             db.commit()
 
-            else:
-                pass
+    #         elif weatherlocation is None:
+    #             db.add(WeatherLocation(**weather.get('location')))
+    #             db.commit()
+
+    #         else:
+    #             pass
 
 
 def rtl433(queue: Queue, proc: Popen):
     """ Чтения данных с Astrometa DVB-T/T2/C FM & DAB """
     from rtl433db.schemas import SensorSchema
-    log.info("=> start")
+    # log.info("=> start")
     sensor = SensorSchema()
+    data_: dict = dict()
     try:
         while True:
             line: bytes = proc.stdout.readline()
             rtl433_data = json.loads(line.decode('utf-8'))
-            if rtl433_conf.log_out:
-                log.info(f"<= {rtl433_data}")
-            queue.put(dict(sensor=sensor.validate(rtl433_data)))
+            data = dict(sensor=sensor.validate(rtl433_data))
+            if data != data_:
+                if rtl433_conf.log_out:
+                    log.info(f"<= {rtl433_data}")
+                queue.put(data)
+                data_ = copy.deepcopy(data)
             time.sleep(1)
     except KeyboardInterrupt:
         proc.kill()
@@ -98,7 +91,7 @@ def main():
 
     w_queue = Queue()
 
-    weatherapi(queue=w_queue)
+    wget(queue=w_queue)
 
     scheduler = BackgroundScheduler()
     log.getLogger('apscheduler').propagate = False
@@ -109,26 +102,24 @@ def main():
                       args=(w_queue, proc),
                       name=rtl433_conf.name)
 
-    scheduler.add_job(weatherapi,
+    scheduler.add_job(wget,
                       'interval',
                       kwargs=dict(queue=w_queue),
                       seconds=weathew_conf.interval)
     scheduler.start()
 
     # создаем таблицы
-    Base.metadata.create_all(bind=engine)
+    # Base.metadata.create_all(bind=engine)
 
     try:
         process.start()
-        log.info(" => start")
+        # log.info(" => start")
         while True:
             if not w_queue.empty():
                 data = w_queue.get_nowait()
-                if rtl433_conf.log_out:
-                    log.info(f"=> {data}")
                 if data == "JSONDecodeError":
                     break
-                add_data(data=data)
+                db(**data)
             time.sleep(1)
         proc.kill()
         proc.communicate()
