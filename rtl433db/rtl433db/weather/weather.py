@@ -11,7 +11,7 @@ from rtl433db.conf import Rtl433Conf as rtl433_conf
 from rtl433db.schemas import WeatherSchema
 
 
-def weatherapi(queue: Queue) -> tuple:
+def wget(queue: Queue) -> tuple:
     """ Получение данных c WeatherAPI """
     status_code, weather = 500, dict(weather=dict())
     try:
@@ -19,7 +19,7 @@ def weatherapi(queue: Queue) -> tuple:
             resp = session.get(conf.url, timeout=conf.timeout)
             status_code, weather = resp.status_code, resp.json()
             if rtl433_conf.log_out:
-                log.info(f"<= {weather} <= {status_code}")
+                log.info(f" <= {weather} <= {status_code}")
             if status_code == 200:
                 weather = WeatherSchema().validate(weather)
                 queue.put(dict(weather=weather))
