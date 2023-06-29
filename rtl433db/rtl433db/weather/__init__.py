@@ -1,6 +1,6 @@
-from rtl433db.weather.weather import weatherapi
+from rtl433db.weather.weather import wget
 
 
 __all__ = (
-    'weatherapi',
+    'wget',
 )
