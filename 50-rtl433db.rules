@@ -15,6 +15,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# =================================================================================
+# Добавить в /etc/udev/rules.d
+# Добавить пользователя в группу 
+# sudo usermod -aG rtlsdr $USER # для CentOS, Almalinux и тп
+# Обновить
+# sudo udevadm control --reload-rules
+# =================================================================================
+
 # original RTL2832U vid/pid (hama nano, for example)
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="0bda", ATTRS{idProduct}=="2832", MODE:="0666"
 
