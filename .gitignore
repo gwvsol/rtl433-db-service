@@ -2,9 +2,12 @@ venv
 *.egg-info
 __pycache__
 release
-archive
+# archive
 .idea
 build
 dist
 *.spec
 *.conf
+*.tar.gz
+*.zip
+*tar.xz
