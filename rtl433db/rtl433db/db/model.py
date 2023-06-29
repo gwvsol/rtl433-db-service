@@ -1,7 +1,9 @@
 from datetime import datetime
 from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy import Column, Integer, Float, String, DateTime, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base, \
+                                       declared_attr
+from sqlalchemy import Column, Integer, Float, \
+                       String, DateTime, ForeignKey
 
 
 class CommonBase(object):
