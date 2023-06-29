@@ -1,3 +1,100 @@
 #!/bin/bash
 
-# Скрипт для запуска приложения
+cd $(dirname $0)
+
+if [ -f $(pwd)/rtl433db/.setting ]; then
+
+    . rtl433db/.setting
+
+else
+
+    printf "\033[0m\033[31m\n"
+    echo "=====                     RTL433DB application is missing                      ===="
+    echo "===== The RTL433DB application does not have an application configuration file ===="
+    printf "\n\033[0m"
+    exit 1
+
+fi
+
+if [ -f $(pwd)/.env ]; then
+
+  . .env
+
+else
+
+    printf "\033[0m\033[31m\n"
+    echo "=== The RTL433DB application does not have a file with the application settings ==="
+    printf "\n\033[0m"
+    exit 1
+
+fi
+
+
+if ! [ -d $(pwd)/$RTL433DB ]; then
+
+    printf "\033[0m\033[31m\n"
+    echo "=====                     RTL433DB application is missing                      ===="
+    printf "\n\033[0m"
+    exit 1
+
+fi
+
+if ! [ -f $(pwd)/Makefile ]; then
+
+        printf "\033[0m\033[31m\n"
+        echo "===== There is no Makefile in the RTL433DB application ====="
+        printf "\n\033[0m"
+        exit 1
+
+fi
+
+if [[ $@ = install ]]; then
+
+    make install && make install-dev && make install-rtl433db
+
+elif [[ $@ = uninstall ]]; then
+
+    make uninstall
+
+elif [[ $@ = check ]]; then
+
+    make check
+
+elif [[ $@ = release ]]; then
+
+    make release
+
+else
+
+    if [ -f $(pwd)/$RTL433DB_CLI ]; then
+
+        if ! [ -d $(pwd)/venv ]; then
+
+        printf "\033[0m\033[31m\n"
+        echo "=====              The virtual environment directory is missing               ====="
+        printf "\n\033[0m"
+        exit 1
+
+        fi
+
+        if ! [ -f $(pwd)/venv/bin/python ]; then
+
+            printf "\033[0m\033[31m\n"
+            echo "=====                   Python is missing in the virtual environment          ====="
+            printf "\n\033[0m"
+            exit 1
+
+        fi
+
+    $(pwd)/venv/bin/python $RTL433DB_CLI $@
+
+    else
+        ls -l $(pwd)/$RTL433DB
+        printf "\033[0m\033[31m\n"
+        echo "=====    The RTL433DB application does not have an application startup file    ===="
+        printf "\n\033[0m"
+        exit 1
+
+    fi
+
+fi
