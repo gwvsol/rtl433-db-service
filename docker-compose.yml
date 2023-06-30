@@ -1,0 +1,20 @@
+version: "3.3"
+
+services:
+
+  rtl433db:
+    container_name: rtl433db
+    image: rtl433db:2023-06-30-01-p3.11
+    restart: unless-stopped
+    environment:
+      INDOCKER: 'TRUE'
+    env_file:
+      - .env
+    privileged: true
+    volumes:
+        - /dev:/dev
+        - /etc/localtime:/etc/localtime:ro
+    logging:
+      driver: journald
+    command: 
+      run
