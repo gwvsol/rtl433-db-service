@@ -1,6 +1,5 @@
-from datetime import datetime
-
 from .base import JSONSchema
+# from rtl433db.log import logging as log
 
 
 class SensorSchemaBase(JSONSchema):
@@ -37,7 +36,6 @@ class SensorSchema:
 
         temp_F = appstruct.get('temperature_F', None)
         temp_C = appstruct.get('temperature_C', None)
-
         humidity = appstruct.get('humidity', None)
 
         if isinstance(temp_C, (int, float)):
@@ -46,19 +44,16 @@ class SensorSchema:
             #  Fahrenheit => Celsius
             temp_C = round((temp_F - 32) / 1.8, 2)
         else:
-            temp_C = 0.0
+            temp_C = None
 
         new = dict(model=appstruct.get('model', ''),
-                   sensor=dict(
-                       model=appstruct.get('model', ''),
-                       sensor_id=appstruct.get('id', ''),
-                       datetime=appstruct.get('time', datetime.now())),
-                   sensor_data=dict(
-                       temperature=temp_C,
-                       datetime=appstruct.get('time', datetime.now()))
+                   datetime=self.structure.to_utc(
+                           appstruct.get('time', None)),
+                   sensor_id=appstruct.get('id', ''),
+                   data=dict(temperature=temp_C),
                    )
 
         if humidity:
-            new.get('sensor_data').update(humidity=humidity)
+            new.get('data').update(humidity=humidity)
 
         return dict(sensor=new)

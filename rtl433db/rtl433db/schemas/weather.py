@@ -1,6 +1,5 @@
-from datetime import datetime
-
 from .base import JSONSchema
+# from rtl433db.log import logging as log
 
 
 class WeatherSchemaBase(JSONSchema):
@@ -54,7 +53,8 @@ class WeatherSchema:
                        country=location.get('country', '').lower(),
                        lat=location.get('lat', 0.0),
                        lon=location.get('lon', 0.0),
-                       datetime=location.get('localtime', datetime.now())),
+                       datetime=self.structure.to_utc(
+                           location.get('localtime', None))),
                    weather=dict(
                        temp_c=current.get('temp_c', 0.0),
                        temp_feelslike_c=current.get('feelslike_c', 0.0),
@@ -66,6 +66,7 @@ class WeatherSchema:
                        precip_mm=current.get('precip_mm', 0.0),
                        humidity=current.get('humidity', 0),
                        gust_kph=current.get('gust_kph', 0.0),
-                       datetime=current.get('last_updated', datetime.now()))
+                       datetime=self.structure.to_utc(
+                           current.get('last_updated', None)))
                    )
         return dict(weather=new)
