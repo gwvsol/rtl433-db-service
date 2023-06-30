@@ -1,9 +1,4 @@
 #===========================================================
-
-# PATHDIR=$(shell pwd | sed 's/\//\\\//g')
-# WorkingDirectory=$(shell cat ${RTL433DB_SERVICEFILE} | grep WorkingDirectory | awk -F "=" '{print $$2}' | sed 's/\//\\\//g')
-
-#===========================================================
 # ################## Установка приложения ##################
 #===========================================================
 # Установка зависимостей
@@ -85,10 +80,10 @@ release: ${RTL433DB} ${ENVIRONMENT} ${MAKEFILE} ${README} ${RTL433DB_RUN}
 	@printf "\033[0m"
 	@printf "\033[34m"
 	@echo "============================ CREATE RELEASE SRC ==============================="
-	@tar -cvzf ${RELEASE}/${RTL433DB}-src-$(EXT_NAME).tar.gz \
+	@tar -cvzf ${RELEASE}/${RTL433DB}-$(EXT_NAME).tar.gz \
 	${RTL433DB} ${ENVIRONMENT} ${MAKEFILE} ${README} ${RTL433DB_RUN}
 	@printf "\033[32m"
-	@printf "\nCREATE RELEASE => ${RELEASE}/${RTL433DB}-src-$(EXT_NAME).tar.gz\n"
+	@printf "\nCREATE RELEASE => ${RELEASE}/${RTL433DB}-$(EXT_NAME).tar.gz\n"
 	@echo "============================ CREATE RELEASE SRC OK! ==========================="
 	@printf "\033[0m"
 
@@ -126,51 +121,82 @@ run: ${VENV_NAME} ${RTL433DB} ${RTL433DB_CLI}
 	@printf "\033[0m"
 	@${PYTHON} ${RTL433DB_CLI} run
 
+#===========================================================
+# ########### Сборка приложения RTL433DB в DOCKER ##########
+#===========================================================
+.PHONY: build
+build: ${DOCKER} ${DOCKERFILE}
+	@printf "\033[0m"
+	@printf "\033[34m"
+	@echo "=============================== BUILD RTL433DB ================================"
+	@make release
+	@printf "\033[34m"
+	@${DOCKER} build \
+	--file ./${DOCKERFILE} \
+	--tag ${RTL433DB}:${REGISTRY_TAG} ./
+#	@${DOCKER} image prune --filter label=stage=builder --force
+	@printf "\033[32m"
+	@echo "======================= BUILD ${RTL433DB}:${REGISTRY_TAG} ===================="
+	@echo "============================ BUILD RTL433DB OK! ==============================="
+	@printf "\033[0m"
 
-# #===========================================================
-# # ############# Приложение локально как сервис #############
-# #===========================================================
+#===========================================================
+# ############# Публикация RTL433DB в REGISTRY #############
+#===========================================================
+.PHONY: deploy
+deploy: clean?=
+deploy: ${DOCKER}
+	@printf "\033[0m"
+	@printf "\033[34m"
+	@echo "============================ DEPLOY IMAGE RTL433DB ============================"
+	@${DOCKER} login -u ${REGISTRY_USER} -p ${REGISTRY_PASSWORD} ${REGISTRY_HOST}
+	@${DOCKER} tag ${RTL433DB}:${REGISTRY_TAG} ${REGISTRY_HOST}/${RTL433DB}:${REGISTRY_TAG}
+	@${DOCKER} push ${REGISTRY_HOST}/${RTL433DB}:${REGISTRY_TAG}
+	@${DOCKER} rmi ${REGISTRY_HOST}/${RTL433DB}:${REGISTRY_TAG}
+	@${DOCKER} logout
+	@printf "\033[34m"
+	@echo "========================== DEPLOY IMAGE RTL433DB OK! =========================="
+	@printf "\033[32m"
+	@make image clean?=${clean}
+	@printf "\033[0m"
 
-# .PHONY: install-service
-# install-service:
-# 	@cp ${RTL433DB_SERVICEFILE} /tmp/${RTL433DB_SERVICEFILE}
-# 	@sed -i 's#${WorkingDirectory}#${PATHDIR}#' /tmp/${RTL433DB_SERVICEFILE}
-# 	@[ -d ${SERVICEDIR} ] || mkdir -p ${SERVICEDIR}
-# 	@mv /tmp/${RTL433DB_SERVICEFILE} ${SERVICEDIR}
-# 	@systemctl --user daemon-reload
-# 	@sudo loginctl enable-linger ${USER}
+#===========================================================
+# ####### Удаление локального образа DOCKER RTL433DB #######
+#===========================================================
 
-# .PHONY: remove-service
-# remove-service: ${SERVICEDIR}/${RTL433DB_SERVICEFILE}
-# 	@make stop-service
-# 	@make remove-autostart-service
-# 	@! [ -f ${SERVICEDIR}/${RTL433DB_SERVICEFILE} ] || rm ${SERVICEDIR}/${RTL433DB_SERVICEFILE}
-# 	@systemctl --user daemon-reload
+.PHONY: image
+image: clean?=
+image: ${DOCKER}
+ifdef clean
+	@printf "\033[0m"
+	@printf "\033[33m"
+	@echo "============================ CLEAN IMAGE RTL433DB ============================="
+	@${DOCKER} rmi ${RTL433DB}:${REGISTRY_TAG}
+	@echo "========================== CLEAN IMAGE RTL433DB OK ============================"
+	@printf "\033[0m"
+endif
 
-# .PHONY: start-service
-# start-service: ${SERVICEDIR}/${RTL433DB_SERVICEFILE}
-# 	@systemctl --user start ${RTL433DB_SERVICEFILE}
+#===========================================================
 
-# .PHONY: stop-service
-# stop-service: ${SERVICEDIR}/${RTL433DB_SERVICEFILE}
-# 	@systemctl --user stop ${RTL433DB_SERVICEFILE}
+# Старт RTL433DB
+.PHONY: start
+start: ${DOCKER} ${COMPOSE_FILE}
+	@${DOCKER} compose -f ${COMPOSE_FILE} up -d
 
-# .PHONY: restart-service
-# restart-service: ${SERVICEDIR}/${RTL433DB_SERVICEFILE}
-# 	@systemctl --user restart ${RTL433DB_SERVICEFILE}
+# Остановка RTL433DB
+.PHONY: stop
+stop: ${DOCKER} ${COMPOSE_FILE}
+	@${DOCKER} compose -f ${COMPOSE_FILE} down
+#	@${DOCKER} container rm ${RTL433DB}
 
-# .PHONY: status-service
-# status-service: ${SERVICEDIR}/${RTL433DB_SERVICEFILE}
-# 	@systemctl --user status ${RTL433DB_SERVICEFILE}
+# Логирование RTL433DB
+.PHONY: log
+log: ${DOCKER} ${COMPOSE_FILE}
+	@${DOCKER} compose -f ${COMPOSE_FILE} logs --follow --tail 500
 
-# .PHONY: autostart-service
-# autostart-service: ${SERVICEDIR}/${RTL433DB_SERVICEFILE}
-# 	@systemctl --user enable ${RTL433DB_SERVICEFILE}
-
-# .PHONY: remove-autostart-service
-# remove-autostart-service: ${SERVICEDIR}/${RTL433DB_SERVICEFILE}
-# 	@systemctl --user disable ${RTL433DB_SERVICEFILE}
-
-# .PHONY: log-service
-# log-service: ${SERVICEDIR}/${RTL433DB_SERVICEFILE}
-# 	@journalctl --user -b -f -u ${RTL433DB_SERVICEFILE}
+# Рестарт RTL433DB
+.PHONY: restart
+restart: ${DOCKER} ${COMPOSE_FILE}
+	@make stop
+	@sleep 3
+	@make start
