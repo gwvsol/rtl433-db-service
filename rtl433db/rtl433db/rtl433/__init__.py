@@ -1,6 +1,6 @@
-from rtl433db.rtl433.rtl433 import main
+from rtl433db.rtl433.rtl433 import rtl433
 
 
 __all__ = (
-    'main',
+    'rtl433',
 )
