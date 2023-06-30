@@ -6,6 +6,8 @@ export PLAYBOOK_CONFIG=playbook.yml
 export PYTHON_VERSION=python3
 export README=README.md
 export RELEASE=release
+export COMPOSE_FILE=docker-compose.yml
+export DOCKERFILE=Dockerfile
 # =============================================
 # RTL433DB
 export RTL433DB=rtl433db
@@ -15,4 +17,10 @@ export RTL433DB_DEPENDENCES_DEV=${RTL433DB}/${DEPENDENCES}-dev.txt
 export RTL433DB_RULES=${RTL433DB}/50-${RTL433DB}.rules
 export RTL433DB_CLI=${RTL433DB}/${RTL433DB}-cli.py
 export RTL433DB_RUN=${RTL433DB}-apps
-# =============================================
+#=============================================
+# REGISTRY
+export REGISTRY_USER=kab
+export REGISTRY_PASSWORD=Let90nc23
+export REGISTRY_TAG=2023-06-30-01-p3.11
+export REGISTRY_HOST=techvsolregistry.svc.1ckab.ru
+#=============================================
