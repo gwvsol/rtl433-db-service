@@ -1,5 +1,7 @@
 import copy
 import jsonschema
+from dateutil import parser
+from datetime import datetime, timezone
 
 
 class ValidationError(Exception):
@@ -33,6 +35,17 @@ class JSONSchema:
             msg = ", ".join([_format_jsonschema_error(e) for e in errors])
             raise ValidationError(msg)
         return appstruct
+
+    def to_utc(self, dtime: str or None = None) -> str:
+        """ Метод преобразования даты и времени в UTC """
+
+        if dtime is None:
+            dtime = str(datetime.now(tz=timezone.utc))
+
+        dtime: datetime = parser.isoparse(dtime)
+        dtime = datetime.fromtimestamp(dtime.timestamp(),
+                                       tz=timezone.utc)
+        return str(dtime)
 
 
 def _format_jsonschema_error(error):
