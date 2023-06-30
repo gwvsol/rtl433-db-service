@@ -16,16 +16,25 @@ else
 
 fi
 
-if [ -f $(pwd)/.env ]; then
 
-  . .env
+if [ -z $INDOCKER ]; then
 
-else
+    if [[ $@ != bash ]]; then
 
-    printf "\033[0m\033[31m\n"
-    echo "=== The RTL433DB application does not have a file with the application settings ==="
-    printf "\n\033[0m"
-    exit 1
+        if [ -f $(pwd)/.env ]; then
+
+        . .env
+
+        else
+
+            printf "\033[0m\033[31m\n"
+            echo "=== The RTL433DB application does not have a file with the application settings ==="
+            printf "\n\033[0m"
+            exit 1
+
+        fi
+
+    fi
 
 fi
 
@@ -39,6 +48,7 @@ if ! [ -d $(pwd)/$RTL433DB ]; then
 
 fi
 
+
 if ! [ -f $(pwd)/Makefile ]; then
 
         printf "\033[0m\033[31m\n"
@@ -47,6 +57,7 @@ if ! [ -f $(pwd)/Makefile ]; then
         exit 1
 
 fi
+
 
 if [[ $@ = install ]]; then
 
@@ -64,7 +75,7 @@ elif [[ $@ = release ]]; then
 
     make release
 
-else
+elif [[ $@ = run ]]; then
 
     if [ -f $(pwd)/$RTL433DB_CLI ]; then
 
@@ -86,7 +97,7 @@ else
 
         fi
 
-    $(pwd)/venv/bin/python $RTL433DB_CLI $@
+        $(pwd)/venv/bin/python $RTL433DB_CLI $@
 
     else
         ls -l $(pwd)/$RTL433DB
@@ -96,5 +107,9 @@ else
         exit 1
 
     fi
+
+else
+
+    $@
 
 fi
