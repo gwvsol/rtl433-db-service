@@ -1,68 +1,17 @@
 import time
 import json
 import copy
-# from functools import wraps
-from subprocess import Popen, PIPE
-# from sqlalchemy.orm import Session
+from subprocess import Popen
+from multiprocessing import Queue
 from json.decoder import JSONDecodeError
-from multiprocessing import Process, Queue
-from apscheduler.schedulers.background import BackgroundScheduler
 
-from rtl433db.conf import Rtl433Conf as rtl433_conf
-from rtl433db.conf import WeatherApiConf as weathew_conf
 from rtl433db.log import logging as log
-# from rtl433db.db import Base, Sensors, Temperature, \
-#                         Weather, WeatherLocation, engine
-from rtl433db.weather import wget
-
-
-def db(sensor: dict = None, weather: dict = None):
-    """ Запись данных в базу данных """
-
-    if rtl433_conf.log_out and (sensor or weather):
-        s = '' if sensor is None else sensor
-        w = '' if weather is None else weather
-        log.info("    => {}{}".format(s, w))
-
-    # with Session(autoflush=False, bind=engine) as db:
-
-    #     if sensor:
-    #         _sensor = db.query(Sensors).filter(
-    #             Sensors.model == sensor.get('model')).first()
-
-    #         if _sensor and isinstance(sensor.get('sensor_data'), dict):
-    #             db.add(Temperature(sensor_id=_sensor.id,
-    #                                **sensor.get('sensor_data')))
-    #             db.commit()
-
-    #         elif _sensor is None:
-    #             db.add(Sensors(**sensor.get('sensor')))
-    #             db.commit()
-
-    #         else:
-    #             pass
-
-    #     if weather:
-    #         weatherlocation = db.query(WeatherLocation).filter(
-    #             WeatherLocation.location == weather.get('name')).first()
-
-    #         if weatherlocation and isinstance(weather.get('weather'), dict):
-    #             db.add(Weather(location=weatherlocation.id,
-    #                            **weather.get('weather')))
-    #             db.commit()
-
-    #         elif weatherlocation is None:
-    #             db.add(WeatherLocation(**weather.get('location')))
-    #             db.commit()
-
-    #         else:
-    #             pass
+from rtl433db.conf import Rtl433Conf as rtl433_conf
 
 
 def rtl433(queue: Queue, proc: Popen):
     """ Чтения данных с Astrometa DVB-T/T2/C FM & DAB """
     from rtl433db.schemas import SensorSchema
-    # log.info("=> start")
     sensor = SensorSchema()
     data_: dict = dict()
     try:
@@ -84,49 +33,3 @@ def rtl433(queue: Queue, proc: Popen):
         queue.put("JSONDecodeError")
         proc.kill()
         proc.communicate()
-
-
-def main():
-    """ Старт приложения rtl_433 """
-
-    w_queue = Queue()
-
-    wget(queue=w_queue)
-
-    scheduler = BackgroundScheduler()
-    log.getLogger('apscheduler').propagate = False
-
-    proc = Popen(rtl433_conf.command.split(), stdout=PIPE)
-
-    process = Process(target=rtl433,
-                      args=(w_queue, proc),
-                      name=rtl433_conf.name)
-
-    scheduler.add_job(wget,
-                      'interval',
-                      kwargs=dict(queue=w_queue),
-                      seconds=weathew_conf.interval)
-    scheduler.start()
-
-    # создаем таблицы
-    # Base.metadata.create_all(bind=engine)
-
-    try:
-        process.start()
-        # log.info(" => start")
-        while True:
-            if not w_queue.empty():
-                data = w_queue.get_nowait()
-                if data == "JSONDecodeError":
-                    break
-                db(**data)
-            time.sleep(1)
-        proc.kill()
-        proc.communicate()
-        process.join()
-        log.error("TUNER DVB-T/T2/C FM & DAB => NOT FOUND => STOP")
-    except (KeyboardInterrupt, SystemExit):
-        scheduler.shutdown()
-        proc.kill()
-        proc.communicate()
-        process.join()
