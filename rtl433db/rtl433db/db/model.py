@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base, \
                                        declared_attr
@@ -23,7 +23,7 @@ class Sensors(Base):
     model = Column(String, nullable=False, index=True)
     sensor_id = Column(String, nullable=False)
     datetime = Column(DateTime(timezone=True),
-                      default=datetime.now())
+                      default=datetime.now(tz=timezone.utc))
 
 
 class Temperature(Base):
@@ -36,7 +36,7 @@ class Temperature(Base):
     temperature = Column(Float, nullable=False)
     humidity = Column(Integer)
     datetime = Column(DateTime(timezone=True),
-                      default=datetime.now())
+                      default=datetime.now(tz=timezone.utc))
 
 
 class WeatherLocation(Base):
@@ -46,7 +46,7 @@ class WeatherLocation(Base):
     lat = Column(Float)
     lon = Column(Float)
     datetime = Column(DateTime(timezone=True),
-                      default=datetime.now())
+                      default=datetime.now(tz=timezone.utc))
 
 
 class Weather(Base):
@@ -75,4 +75,4 @@ class Weather(Base):
     # Порывы ветра в км/час
     gust_kph = Column(Float)
     datetime = Column(DateTime(timezone=True),
-                      default=datetime.now())
+                      default=datetime.now(tz=timezone.utc))
