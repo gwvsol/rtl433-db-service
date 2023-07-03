@@ -54,3 +54,23 @@ def write(sensor: dict = None, weather: dict = None):
             elif weatherlocation is None:
                 db.add(WeatherLocation(**data.get('location')))
                 db.commit()
+
+
+def sensors(model: str) -> tuple:
+    """ Получение последних данных внешнего
+        сенсора погоды из базы данных
+        return (temperature, humidity, datetime, model)"""
+
+    response = (None, None, None, None)
+    with Session(autoflush=False, bind=engine) as db:
+        resp = db.query(
+            Temperature.temperature,
+            Temperature.humidity,
+            Temperature.datetime,
+            Sensors.model).join(
+                Sensors, Temperature.sensor_id == Sensors.id).filter(
+                    Sensors.model == model).order_by(
+                        Temperature.datetime.desc()).first()
+        response = resp if resp else response
+
+    return response
