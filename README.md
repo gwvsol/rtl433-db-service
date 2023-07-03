@@ -100,3 +100,19 @@ OS v2.1 Sync test val 559995a5 found, starting decode at bit 0
 Found sensor_id (0000ec40)
 
 ```
+
+```sql
+
+SELECT sensors.model, temperature, humidity, temperature.datetime FROM temperature JOIN sensors ON temperature.sensor_id = sensors.id WHERE sensors.model='Oregon-THGR810' ORDER BY temperature.datetime DESC limit 1;
+
+SELECT sensors.model, temperature, humidity, temperature.datetime FROM temperature JOIN sensors ON temperature.sensor_id = sensors.id WHERE sensors.model='AlectoV1-Temperature' ORDER BY temperature.datetime DESC limit 1;
+
+SELECT sensors.model, temperature, humidity, temperature.datetime FROM temperature JOIN sensors ON temperature.sensor_id = sensors.id WHERE sensors.model='inFactory-TH' ORDER BY temperature.datetime DESC limit 1;
+
+```
+
+```sql
+SELECT temperature.temperature AS temperature_temperature, temperature.humidity AS temperature_humidity, temperature.datetime AS temperature_datetime, sensors.model AS sensors_model 
+FROM temperature JOIN sensors ON temperature.sensor_id = sensors.id 
+WHERE sensors.model = 'Oregon-THN132N' ORDER BY temperature.datetime DESC limit 5;
+```   
