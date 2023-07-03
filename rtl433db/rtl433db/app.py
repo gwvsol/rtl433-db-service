@@ -6,29 +6,41 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from rtl433db.weather import wget
 from rtl433db.rtl433 import rtl433
 from rtl433db.log import logging as log
-from rtl433db.db import Base, engine, write
+from rtl433db.db import Base, engine, write, sensors
 from rtl433db.conf import Rtl433Conf as rtl433_conf
 from rtl433db.conf import WeatherApiConf as weathew_conf
+from rtl433db.conf import NarodMonConf as narodmon_conf
 
 
 def run_app():
     """ Старт приложения rtl_433 """
     w_queue = Queue()
-    wget(queue=w_queue)
-
-    scheduler = BackgroundScheduler()
-    log.getLogger('apscheduler').propagate = False
 
     proc = Popen(rtl433_conf.command.split(), stdout=PIPE)
     process = Process(target=rtl433,
                       args=(w_queue, proc),
                       name=rtl433_conf.name)
 
-    scheduler.add_job(wget,
-                      'interval',
-                      kwargs=dict(queue=w_queue),
-                      seconds=weathew_conf.interval)
-    scheduler.start()
+    if weathew_conf.enable or narodmon_conf.enable:
+        scheduler = BackgroundScheduler()
+        log.getLogger('apscheduler').propagate = False
+
+    if weathew_conf.enable:
+        wget(queue=w_queue)
+        scheduler.add_job(wget,
+                          'interval',
+                          kwargs=dict(queue=w_queue),
+                          seconds=weathew_conf.interval)
+
+    if narodmon_conf.enable:
+        sensors(model=narodmon_conf.sensor_model)
+        scheduler.add_job(sensors,
+                          'interval',
+                          kwargs=dict(model=narodmon_conf.sensor_model),
+                          seconds=narodmon_conf.interval)
+
+    if weathew_conf.enable or narodmon_conf.enable:
+        scheduler.start()
 
     # создаем таблицы
     Base.metadata.create_all(bind=engine)
@@ -47,7 +59,10 @@ def run_app():
         process.join()
         log.error("TUNER DVB-T/T2/C FM & DAB => NOT FOUND => STOP")
     except (KeyboardInterrupt, SystemExit):
-        scheduler.shutdown()
+
+        if weathew_conf.enable:
+            scheduler.shutdown()
+
         proc.kill()
         proc.communicate()
         process.join()
