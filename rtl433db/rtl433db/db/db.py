@@ -75,7 +75,7 @@ def sensors(model: str) -> tuple:
 
         if resp and rtl433_conf.log_out:
             log.info("<= model: {}, temp: {}, humidity: {},  datetime: {}".format(
-                resp[3], resp[0], resp[1], str(resp[2])
+                resp[3], resp[0], resp[1], resp[2]
             ))
 
         response = resp if resp else response
