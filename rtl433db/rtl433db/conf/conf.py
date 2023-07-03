@@ -104,6 +104,13 @@ else:
 
 narodmon_enable = True if narodmon_host and narodmon_port else False
 
+narodmon_login = os.getenv('NARODMON_LOGIN', default=None)
+if narodmon_enable and narodmon_login is None:
+    log.error('NARODMON_LOGIN ERROR in env')
+    sys.exit(os.EX_SOFTWARE)
+else:
+    log.info(f"NARODMON_LOGIN     => {narodmon_login}")
+
 narodmon_sensor = os.getenv('NARODMON_SENSOR', default=None)
 if narodmon_enable and narodmon_sensor is None:
     log.error('NARODMON_SENSOR ERROR in env')
@@ -149,6 +156,7 @@ class WeatherApiConf:
 class NarodMonConf:
     host: str = narodmon_host
     port: int = narodmon_port
+    login: str = narodmon_login
     # интервал отправки данных в секундах
     # interval: int = 180
     interval: int = 10
