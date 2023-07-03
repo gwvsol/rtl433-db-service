@@ -75,6 +75,8 @@ def sensors(model: str) -> tuple:
 
         if resp and rtl433_conf.log_out:
             log.info(resp)
+            log.info(resp[2].utcoffset())
+            log.info(type(resp[2].utcoffset()))
             log.info("<= model: {}, temp: {}, humidity: {},  datetime: {}".format(
                 resp[3], resp[0], resp[1], resp[2]
             ))
