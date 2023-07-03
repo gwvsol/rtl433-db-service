@@ -74,7 +74,7 @@ def sensors(model: str) -> tuple:
                         Temperature.datetime.desc()).first()
 
         if resp and rtl433_conf.log_out:
-            log.info("model: {}, temp: {}, humidity: {},  datetime: {}".format(
+            log.info("<= model: {}, temp: {}, humidity: {},  datetime: {}".format(
                 resp[3], resp[0], resp[1], str(resp[2])
             ))
 
