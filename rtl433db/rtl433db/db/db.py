@@ -62,6 +62,7 @@ def sensors(model: str) -> tuple:
         return (temperature, humidity, datetime, model)"""
 
     response = (None, None, None, None)
+
     with Session(autoflush=False, bind=engine) as db:
         resp = db.query(
             Temperature.temperature,
@@ -71,6 +72,12 @@ def sensors(model: str) -> tuple:
                 Sensors, Temperature.sensor_id == Sensors.id).filter(
                     Sensors.model == model).order_by(
                         Temperature.datetime.desc()).first()
+
+        if resp and rtl433_conf.log_out:
+            log.info("model: {}, temp: {}, humidity: {},  datetime: {}".format(
+                resp[3], resp[0], resp[1], str(resp[2])
+            ))
+
         response = resp if resp else response
 
     return response
