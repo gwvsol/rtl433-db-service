@@ -18,3 +18,18 @@ services:
       driver: journald
     command: 
       run
+    depends_on:
+      - rtl433db-db
+
+  rtl433db-db:
+    container_name: rtl433db-db
+    image: geoservice-db-pg14:2023-04-06-01
+#    ports:
+#      - "127.0.0.1:5432:5432"
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: RFVmjuIEDC
+    volumes:
+      - "/var/data/services/rtl433db-data:/var/lib/postgresql/data"
+    logging:
+      driver: journald
