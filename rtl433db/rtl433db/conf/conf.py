@@ -109,7 +109,7 @@ if narodmon_enable and narodmon_login is None:
     log.error('NARODMON_LOGIN ERROR in env')
     sys.exit(os.EX_SOFTWARE)
 else:
-    log.info(f"NARODMON_LOGIN     => {narodmon_login}")
+    log.info(f"NARODMON_LOGIN      => {narodmon_login}")
 
 narodmon_sensor = os.getenv('NARODMON_SENSOR', default=None)
 if narodmon_enable and narodmon_sensor is None:
