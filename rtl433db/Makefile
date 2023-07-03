@@ -191,9 +191,14 @@ stop: ${DOCKER} ${COMPOSE_FILE}
 #	@${DOCKER} container rm ${RTL433DB}
 
 # Логирование RTL433DB
-.PHONY: log
-log: ${DOCKER} ${COMPOSE_FILE}
-	@${DOCKER} compose -f ${COMPOSE_FILE} logs --follow --tail 500
+.PHONY: log-rtl433srv
+log-rtl433srv: ${DOCKER} ${COMPOSE_FILE}
+	@${DOCKER} compose -f ${COMPOSE_FILE} logs --follow --tail 500 rtl433db
+
+# Логирование RTL433DB
+.PHONY: log-rtl433db
+log-rtl433db: ${DOCKER} ${COMPOSE_FILE}
+	@${DOCKER} compose -f ${COMPOSE_FILE} logs --follow --tail 500 rtl433db-db
 
 # Рестарт RTL433DB
 .PHONY: restart
