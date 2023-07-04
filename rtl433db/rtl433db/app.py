@@ -5,6 +5,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from rtl433db.weather import wget
 from rtl433db.rtl433 import rtl433
+from rtl433db.narodmon import send
 from rtl433db.log import logging as log
 from rtl433db.db import Base, engine, write, sensors
 from rtl433db.conf import Rtl433Conf as rtl433_conf
@@ -33,10 +34,10 @@ def run_app():
                           seconds=weathew_conf.interval)
 
     if narodmon_conf.enable:
-        sensors(model=narodmon_conf.sensor_model)
-        scheduler.add_job(sensors,
+        send(sensors=sensors)
+        scheduler.add_job(send,
                           'interval',
-                          kwargs=dict(model=narodmon_conf.sensor_model),
+                          kwargs=dict(sensors=sensors),
                           seconds=narodmon_conf.interval)
 
     if weathew_conf.enable or narodmon_conf.enable:
