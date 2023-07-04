@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import ProgrammingError
 
 from rtl433db.log import logging as log
 from rtl433db.conf import Rtl433Conf as rtl433_conf
@@ -63,24 +64,35 @@ def sensors(model: str) -> tuple:
 
     response = (None, None, None, None)
 
-    with Session(autoflush=False, bind=engine) as db:
-        resp = db.query(
-            Temperature.temperature,
-            Temperature.humidity,
-            Temperature.datetime,
-            Sensors.model).join(
-                Sensors, Temperature.sensor_id == Sensors.id).filter(
-                    Sensors.model == model).order_by(
-                        Temperature.datetime.desc()).first()
+    try:
 
-        if resp and rtl433_conf.log_out:
-            log.info(resp)
-            log.info(resp[2].utcoffset())
-            log.info(type(resp[2].utcoffset()))
-            log.info("<= model: {}, temp: {}, humidity: {},  datetime: {}".format(
-                resp[3], resp[0], resp[1], resp[2]
-            ))
+        with Session(autoflush=False, bind=engine) as db:
 
-        response = resp if resp else response
+            resp = db.query(
+                Temperature.temperature,
+                Temperature.humidity,
+                Temperature.datetime,
+                Sensors.model).join(
+                    Sensors, Temperature.sensor_id == Sensors.id).filter(
+                        Sensors.model == model).order_by(
+                            Temperature.datetime.desc()).first()
+
+            if resp and rtl433_conf.log_out:
+
+                temperature, humidity, datetime, model = resp
+
+                resp_log = "   <= model: {}, temperature: {}".format(
+                    model, temperature)
+
+                if humidity:
+                    resp_log = "{}, humidity: {}".format(resp_log, humidity)
+
+                log.info("{}, datetime: {}".format(
+                    resp_log, datetime))
+
+            response = resp if resp else response
+
+    except ProgrammingError as err:
+        log.error("error => {}".format(err))
 
     return response
