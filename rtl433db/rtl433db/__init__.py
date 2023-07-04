@@ -7,7 +7,7 @@ __maintainer__ = 'Fedorov Mikhail'
 
 __email__ = 'jwvsol@yandex.ru'
 __license__ = 'MIT'
-__version__ = '0.1'
+__version__ = '0.5'
 __doc__ = 'RTL433DB SERVICE'
 
 
