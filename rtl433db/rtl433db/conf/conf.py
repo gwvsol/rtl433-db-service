@@ -111,12 +111,12 @@ if narodmon_enable and narodmon_login is None:
 else:
     log.info(f"NARODMON_LOGIN      => {narodmon_login}")
 
-narodmon_sensor = os.getenv('NARODMON_SENSOR', default=None)
+narodmon_sensor = os.getenv('NARODMON_SENSOR_ID', default=None)
 if narodmon_enable and narodmon_sensor is None:
-    log.error('NARODMON_SENSOR ERROR in env')
+    log.error('NARODMON_SENSOR_ID ERROR in env')
     sys.exit(os.EX_SOFTWARE)
 else:
-    log.info(f"NARODMON_SENSOR     => {narodmon_sensor}")
+    log.info(f"NARODMON_SENSOR_ID  => {narodmon_sensor}")
 
 narodmon_sensor_model = os.getenv('NARODMON_SENSOR_MODEL', default=None)
 if narodmon_enable and narodmon_sensor_model is None:
@@ -125,15 +125,15 @@ if narodmon_enable and narodmon_sensor_model is None:
 else:
     log.info(f"NARODMON_SENSOR_MODEL => {narodmon_sensor_model}")
 
-narodmon_sensor_latitude = os.getenv('NARODMON_SENSOR_LATITUDE',
-                                     default=None)
-if narodmon_enable:
-    log.info(f"NARODMON_SENSOR_LATITUDE => {narodmon_sensor_latitude}")
+narodmon_sensor_lat = os.getenv('NARODMON_SENSOR_LAT',
+                                default=None)
+if narodmon_enable and narodmon_sensor_lat:
+    log.info(f"NARODMON_SENSOR_LAT => {narodmon_sensor_lat}")
 
-narodmon_sensor_longitude = os.getenv('NARODMON_SENSOR_LONGITUDE',
-                                      default=None)
-if narodmon_enable and narodmon_sensor_longitude:
-    log.info(f"NARODMON_SENSOR_LONGITUDE => {narodmon_sensor_longitude}")
+narodmon_sensor_long = os.getenv('NARODMON_SENSOR_LONG',
+                                 default=None)
+if narodmon_enable and narodmon_sensor_long:
+    log.info(f"NARODMON_SENSOR_LONG => {narodmon_sensor_long}")
 
 # =====================================================
 
@@ -158,13 +158,14 @@ class NarodMonConf:
     port: int = narodmon_port
     login: str = narodmon_login
     # интервал отправки данных в секундах
-    # interval: int = 180
-    interval: int = 10
+    interval: int = 180
+    # interval: int = 65
+    # interval: int = 10
     enable: bool = narodmon_enable
     sensor: str = narodmon_sensor
     sensor_model: str = narodmon_sensor_model
-    latitude: str = narodmon_sensor_latitude
-    longitude: str = narodmon_sensor_longitude
+    lat: str = narodmon_sensor_lat
+    long: str = narodmon_sensor_long
 
 
 # =====================================================
