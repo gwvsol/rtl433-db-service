@@ -27,7 +27,7 @@ def format_data(data: tuple) -> bytes:
         DATA: str = "{}#TEMP1#{}#{}#OUTDOOR\n".format(DATA, TEMP, TIME)
 
     if HUM:
-        DATA: str = "{}#HUM1#{}#{}#OUTDOOR\n".format(DATA, HUM, TIME)
+        DATA: str = "{}#HUM#{}#{}#OUTDOOR\n".format(DATA, HUM, TIME)
 
     DATA: str = "{}##".format(DATA)
 
