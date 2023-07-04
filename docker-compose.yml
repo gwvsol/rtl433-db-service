@@ -12,8 +12,8 @@ services:
       - .env
     privileged: true
     volumes:
-        - /dev:/dev
-        - /etc/localtime:/etc/localtime:ro
+        - "/dev:/dev"
+        - "/etc/localtime:/etc/localtime:ro"
     logging:
       driver: journald
     command: 
