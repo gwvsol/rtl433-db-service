@@ -1,4 +1,4 @@
-FROM python:3.11-bookworm
+FROM python:3.11-bullseye
 LABEL maintainer="Mikhail Fedorov" email="jwvsol@yandex.ru"
 # LABEL stage=builder
 
