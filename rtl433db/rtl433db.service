@@ -1,0 +1,32 @@
+# => sudo systemctl daemon-reload
+# => sudo systemctl start rtl433db.service
+# => sudo systemctl stop rtl433db.service
+# => sudo systemctl restart rtl433db.service
+# => sudo systemctl status rtl433db.service
+# => sudo systemctl enable rtl433db.service
+# => sudo systemctl disable rtl433db.service
+# => journalctl -b -f -u rtl433db.service
+#
+# Исправить User и Group
+# Заменить путь установки WorkingDirectory и ExecStart
+# => /home/work/rtl433db-service
+# Cкопировать в => /lib/systemd/system
+
+[Unit]
+Description=Service RTL433
+
+[Service]
+Type=simple
+User=work
+Group=work
+#
+WorkingDirectory=/home/work/rtl433db-service
+#
+ExecStart=/home/work/rtl433db-service/rtl433db-apps run
+# Restart=always
+Restart=on-failure
+RestartSec=10
+
+[Install]
+# WantedBy=default.target
+WantedBy=multi-user.target
