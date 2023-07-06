@@ -4,7 +4,7 @@ services:
 
   rtl433db:
     container_name: rtl433db
-    image: rtl433db:2023-07-04-01-p3.11
+    image: rtl433db:2023-07-06-01-p3.11-bullseye
     restart: unless-stopped
     environment:
       INDOCKER: 'TRUE'
