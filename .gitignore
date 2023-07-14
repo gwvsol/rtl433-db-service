@@ -2,7 +2,7 @@ venv
 *.egg-info
 __pycache__
 release
-# archive
+archive
 .idea
 build
 dist
@@ -11,4 +11,3 @@ dist
 *.tar.gz
 *.zip
 *tar.xz
-archive-
