@@ -11,6 +11,7 @@ steps:
 
 - name: build-and-deploy
   image: plugins/docker
+  privileged: true
   volumes:
   - name: dockersock
     path: /var/run/docker.sock
