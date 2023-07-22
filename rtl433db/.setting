@@ -21,6 +21,6 @@ export RTL433DB_RUN=${RTL433DB}-apps
 # REGISTRY
 export REGISTRY_USER=techvsol
 export REGISTRY_PASSWORD="QAZmju&*ik"
-export REGISTRY_TAG=2023-07-22t01-01-p3.11-bullseye
+export REGISTRY_TAG=2023-07-22c01-01-p3.11-bullseye
 export REGISTRY_HOST=srv02.hldns.ru
 #=============================================
