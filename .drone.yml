@@ -19,7 +19,7 @@ steps:
     - apk update
     - apk add make
     - make build
-    - make deploy
+    - make deploy clean=true
 
 volumes:
 - name: dockersock
