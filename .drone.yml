@@ -21,7 +21,20 @@ steps:
     - make build
     - make deploy clean=true
 
+- name: release-apps
+  image: plugins/gitea-release
+  privileged: true
+  settings:
+    api_key: ea4e5409276854543a41c49dcf471e5aea4a5197
+    base_url: https://git.hldns.ru
+    title: 0.5
+    note: CHANGELOG.md
+
 volumes:
 - name: dockersock
   host:
       path: /var/run/docker.sock
+
+trigger:
+  event:
+  - tag
